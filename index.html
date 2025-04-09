@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <title>Controle de Inventário</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .traffic-light {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+      }
+      .ok {
+        background-color: green;
+      }
+      .nok {
+        background-color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Controle de Inventário</h1>
+    <div id="tableContainer">Carregando base de dados...</div>
+
+    <script>
+      // Caminho relativo para o arquivo JSON hospedado no mesmo domínio (GitHub Pages)
+      const fileUrl = './database.json';
+
+      fetch(fileUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Erro na requisição: ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => generateTable(data))
+        .catch(error => {
+          console.error("Erro ao carregar o arquivo JSON:", error);
+          document.getElementById('tableContainer').innerText = "Erro ao carregar a base de dados.";
+        });
+
+      function generateTable(data) {
+        let html = '<table>';
+
+        // Se há dados, cria um cabeçalho com as chaves do primeiro objeto
+        if (data.length > 0) {
+          html += '<thead><tr>';
+          for (const key in data[0]) {
+            html += '<th>' + key + '</th>';
+          }
+          html += '</tr></thead>';
+        }
+
+        html += '<tbody>';
+        data.forEach(row => {
+          html += '<tr>';
+          for (const key in row) {
+            let cellValue = row[key];
+            // Se for a coluna "OK/NOK": insere o semáforo
+            if (key.trim().toUpperCase() === 'OK/NOK') {
+              cellValue = '<div class="traffic-light ' +
+                (cellValue.toString().trim().toUpperCase() === 'OK' ? 'ok' : 'nok') +
+                '"></div>';
+            }
+            html += '<td>' + cellValue + '</td>';
+          }
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+
+        document.getElementById('tableContainer').innerHTML = html;
+      }
+    </script>
+  </body>
+</html>
